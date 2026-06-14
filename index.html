@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ハースストーン：バトルグラウンドの異常別BAN・制限一覧">
+  <title>異常別 BAN・制限一覧</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header>
+    <h1>異常別 BAN・制限一覧</h1>
+    <p>ハースストーン：バトルグラウンドの異常ごとの利用制限をまとめています。</p>
+  </header>
+
+  <section class="controls" aria-label="絞り込み">
+    <label>
+      <span>検索</span>
+      <input id="q" type="search" placeholder="異常名・対象・備考を検索" autocomplete="off">
+    </label>
+    <label>
+      <span>制限種別</span>
+      <select id="type"><option value="">すべて</option></select>
+    </label>
+    <label>
+      <span>状態</span>
+      <select id="status"><option value="">すべて</option></select>
+    </label>
+  </section>
+
+  <main>
+    <div class="summary" id="summary" aria-live="polite"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>区分</th><th>異常</th><th>制限内容</th><th>対象</th><th>状態</th><th>備考</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <noscript>この一覧の表示にはJavaScriptが必要です。</noscript>
+  </main>
+
+  <footer>
+    <p>最終更新：2026年6月14日</p>
+    <p>現行確認・公式履歴・旧仕様など、情報の確認状態を区別して掲載しています。</p>
+  </footer>
+
+  <script>window.BG_BAN_ROWS = [];</script>
+  <script src="./data/rows-01.js"></script>
+  <script src="./data/rows-02.js"></script>
+  <script src="./data/rows-03.js"></script>
+  <script src="./data/rows-04.js"></script>
+  <script src="./data/rows-05.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
