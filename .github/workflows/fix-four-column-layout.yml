@@ -1,0 +1,49 @@
+name: Fix four-column item layout
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/fix-four-column-layout.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fix item grids to four columns
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("index.html")
+          text = path.read_text(encoding="utf-8")
+
+          old_grid = ".items { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0 18px; align-content:start; padding:7px 14px 12px; }"
+          new_grid = ".items { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 18px; align-content:start; padding:7px 14px 12px; }"
+          old_mobile = ".items { padding-top:11px; } }"
+          new_mobile = ".items { grid-template-columns:1fr; padding-top:11px; } }"
+
+          if old_grid not in text:
+              raise SystemExit("Desktop item-grid rule was not found.")
+          if old_mobile not in text:
+              raise SystemExit("Mobile item-grid rule was not found.")
+
+          text = text.replace(old_grid, new_grid, 1)
+          text = text.replace(old_mobile, new_mobile, 1)
+          path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Commit layout fix and remove one-time workflow
+        run: |
+          rm .github/workflows/fix-four-column-layout.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/fix-four-column-layout.yml
+          git commit -m "Fix anomaly item grids to four columns"
+          git push
