@@ -21,11 +21,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python scripts/fix_golganneth_hero_bans.py
-      - run: |
+      - name: Run correction and capture diagnostics
+        run: |
+          set +e
+          python scripts/fix_golganneth_hero_bans.py > golganneth-run.log 2>&1
+          echo "exit_code=$?" >> golganneth-run.log
+          exit 0
+      - name: Commit correction or diagnostic
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html golganneth-run.log
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Correct Golganneth hero BAN list"
+          git commit -m "Run Golganneth hero BAN correction"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
