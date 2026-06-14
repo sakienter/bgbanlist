@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ハースストーン：バトルグラウンドの異常別BAN・制限一覧">
+<title>Anomaly Ban Ledger</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg:#f5f4ef;
+  --paper:#fffefa;
+  --panel:#fff;
+  --ink:#202124;
+  --muted:#697078;
+  --line:#d9d7cd;
+  --soft:#faf9f3;
+  --old:#fff2d6;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif; }
+header { padding:28px 32px 20px; background:var(--paper); border-bottom:1px solid var(--line); }
+h1 { margin:0 0 8px; font-size:28px; line-height:1.25; }
+p { margin:0; color:var(--muted); line-height:1.55; }
+.controls { position:sticky; top:0; z-index:4; display:grid; grid-template-columns:minmax(240px,1fr) 220px 210px; gap:10px; padding:14px 32px; background:rgba(245,244,239,.97); border-bottom:1px solid var(--line); }
+input,select { width:100%; min-height:40px; border:1px solid var(--line); border-radius:4px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
+main { max-width:1180px; margin:0 auto; padding:20px 32px 42px; }
+.summary { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:16px; color:var(--muted); font-size:13px; }
+.ledger { display:grid; gap:16px; }
+.anomaly { background:var(--panel); border:1px solid var(--line); }
+.anomaly-header { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:start; padding:16px 18px 14px; border-bottom:1px solid var(--line); background:var(--paper); }
+.anomaly-title { margin:0; font-size:20px; line-height:1.4; }
+.meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+.count { padding-top:3px; color:var(--muted); font-size:13px; white-space:nowrap; }
+.status,.source-label { display:inline-block; padding:3px 7px; border:1px solid var(--line); border-radius:4px; background:#fff; color:#40504d; font-size:12px; line-height:1.25; }
+.status.old { background:var(--old); color:#745009; }
+.groups { display:grid; }
+.group { display:grid; grid-template-columns:148px minmax(0,1fr); border-top:1px solid #eeeeea; }
+.group:first-child { border-top:0; }
+.group-label { padding:14px 16px; border-right:1px solid #eeeeea; background:var(--soft); }
+.group-label strong { display:block; font-size:13px; letter-spacing:.04em; }
+.group-label span { display:block; margin-top:4px; color:var(--muted); font-size:12px; }
+.items { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0 18px; padding:7px 14px 12px; }
+.item { display:block; padding:9px 0; border-bottom:1px solid #ecebe5; line-height:1.35; font-size:14px; }
+.item::before { content:"— "; color:var(--muted); }
+.note { display:block; margin-top:3px; color:#775817; font-size:12px; }
+.empty { padding:28px; border:1px dashed var(--line); background:#fff; color:var(--muted); text-align:center; }
+footer { max-width:1180px; margin:0 auto; padding:0 32px 30px; color:var(--muted); font-size:13px; }
+@media (max-width:760px) {
+  header { padding:24px 16px 18px; }
+  h1 { font-size:23px; }
+  .controls { position:static; grid-template-columns:1fr; padding:12px 16px; }
+  main,footer { padding-left:16px; padding-right:16px; }
+  .anomaly-header { grid-template-columns:1fr; }
+  .count { padding-top:0; }
+  .group { grid-template-columns:1fr; }
+  .group-label { border-right:0; border-bottom:1px solid #eeeeea; padding:11px 14px; }
+  .items { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Anomaly Ban Ledger</h1>
+  <p>異常ごとに、ヒーロー・カード・装飾品などの利用制限をまとめています。</p>
+</header>
+<section class="controls" aria-label="絞り込み">
+  <input id="q" type="search" placeholder="異常名・対象・備考を検索" autocomplete="off">
+  <select id="type"><option value="">すべての対象種別</option></select>
+  <select id="status"><option value="">すべての確認状態</option></select>
+</section>
+<main>
+  <div class="summary" id="summary" aria-live="polite"></div>
+  <div class="ledger" id="ledger"></div>
+</main>
+<footer>最終更新：2026年6月14日。現行確認・公式履歴・旧仕様などの状態を区別して掲載しています。</footer>
+
+<script>window.BG_BAN_ROWS=[];</script>
+<script src="./data/rows-01.js"></script>
+<script src="./data/rows-02.js"></script>
+<script src="./data/rows-03.js"></script>
+<script src="./data/rows-04.js"></script>
+<script src="./data/rows-05.js"></script>
+<script>
+const NAME_MAP = {
+  "A Faire Reward":"【A Faire Reward/ フェア報酬】",
+  "Anomalous Cube / Mystery Cube (異常なキューブ)":"【Anomalous Cube/ 異常な立方体】",
+  "Anomalous Expedition (異常な探検)":"【Anomalous Expedition/ 異常な探検】",
+  "Anomalous Wisdomball":"【Anomalous Wisdomball/ 異常な教育球】",
+  "Audience’s Choice":"【Audience’s Choice/ 観客の選択】",
+  "Big League":"【Big League/ 大リーグ】",
+  "Bring Home the Bacon":"【Bring Home the Bacon/ ベーコン熟成】",
+  "Bring in the Buddies":"【Bring in the Buddies/ カモン、エブリバディ】",
+  "Continuing Education":"【Continuing Education/ 生涯教育】",
+  "Elven Elite":"【Elven Elite/ エルフのエリート】",
+  "Emergency Landing":"【Emergency Landing/ 緊急着水】",
+  "False Idols (偽りの偶像)":"【False Idols/ 偽りの偶像】",
+  "Galakrond":"【Galakrond/ ガラクロンド】",
+  "Gladiator’s Spoils":"【Gladiator’s Spoil/ 剣闘士の戦利品】",
+  "Golden Arrow":"【Golden Arrow/ 黄金の矢】",
+  "Golden Friendship":"【Golden Friendship/ 黄金の友情】",
+  "Golganneth’s Tempest (ゴルガンネスの天変地異)":"【Golganneth’s Tempest/ ゴルガンネスの天変地異】",
+  "Greater Pouches":"【Greater Pouches/ 上級袋】",
+  "Impressive Foresight":"【Impressive Foresight/ 素晴らしい先見性】",
+  "Incubation Mutation":"【Incubation Mutation/ 培養変異体】",
+  "Lesser Fortune (下級の幸運)":"【Lesser Fortune/ 下級運勢】",
+  "Lesser Pouches":"【Lesser Pouches/ 下級袋】",
+  "Light the Way":"【Light the Way/ 道を照らす光】",
+  "Line in the Sand":"【Line in the Sand/ 砂の覚醒】",
+  "Magic Shop":"【Magic Shop/ 魔法の店】",
+  "Match Fixing":"【Match Fixing/ 八百長】",
+  "Money Match":"【Money Match/ マネーマッチ】",
+  "No Face, No Case":"【No Face, No Case/ 貌ナシ不起訴処分】",
+  "Oathstone’s Summoning (オースストーンの召喚)":"【Oathstone’s Summoning/ オースストーンの召喚】",
+  "Packed Stands":"【Packed Stands/ スタンド満員】",
+  "Path of the Treasure-Seeker":"【Path of the Treasure-Seeker/ トレジャーシーカーの道】",
+  "Pooled Resources":"【Pooled Resources/ 現金書留】",
+  "Secrets of Norgannon":"【Secrets of Norgannon/ ノルガノンの秘密】",
+  "Tavern Special":"【Tavern Special/ 酒場スペシャル】",
+  "Treasure Hoard":"【Treasure Hoard/ お宝貯蔵庫】",
+  "Uncompensated Upset":"【Uncompensated Upset/ 補償なき市場】",
+  "ゴールデン闘技場":"【The Golden Arena/ ゴールデン闘技場】",
+  "ミミロンの時計仕掛けスタジアム":"【Mimiron’s Clockwork Stadium/ ミミロンの時計仕掛けスタジアム】",
+  "偽りの偶像":"【False Idols/ 偽りの偶像】"
+};
+
+const GROUPS = [
+  {key:"hero",label:"HERO",hint:"ヒーロー"},
+  {key:"card",label:"MINION / CARD",hint:"ミニオン・カード"},
+  {key:"trinket",label:"TRINKET",hint:"装飾品・報酬"},
+  {key:"reroll",label:"REROLL / OFFER",hint:"再抽選・提示除外"},
+  {key:"special",label:"SPECIAL",hint:"種族・効果変更など"}
+];
+
+const rows = window.BG_BAN_ROWS.map(row => ({
+  ...row,
+  anomaly: NAME_MAP[row.anomaly] || row.anomaly,
+  group: groupOf(row.restriction)
+}));
+
+const q=document.getElementById("q");
+const type=document.getElementById("type");
+const status=document.getElementById("status");
+const summary=document.getElementById("summary");
+const ledger=document.getElementById("ledger");
+
+function esc(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}
+function groupOf(restriction){
+  if(/ヒーロー|HERO/i.test(restriction)) return "hero";
+  if(/装飾品|報酬|TRINKET/i.test(restriction)) return "trinket";
+  if(/再抽選|提示|候補|Timewarp|Mystery Cube/i.test(restriction)) return "reroll";
+  if(/カード|ミニオン|酒場呪文|CARD|MINION/i.test(restriction)) return "card";
+  return "special";
+}
+function fillSelects(){
+  GROUPS.forEach(group=>{const option=document.createElement("option");option.value=group.key;option.textContent=`${group.label}（${group.hint}）`;type.appendChild(option);});
+  [...new Set(rows.map(row=>row.status).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ja")).forEach(value=>{const option=document.createElement("option");option.value=value;option.textContent=value;status.appendChild(option);});
+}
+function groupByAnomaly(filtered){
+  const map=new Map();
+  filtered.forEach(row=>{if(!map.has(row.anomaly)) map.set(row.anomaly,[]);map.get(row.anomaly).push(row);});
+  return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0],"ja"));
+}
+function renderItem(row){
+  const note=row.note?`<span class="note">${esc(row.note)}</span>`:"";
+  return `<div class="item" title="${esc(row.restriction)}">${esc(row.target)}${note}</div>`;
+}
+function renderGroup(group,groupRows){
+  if(!groupRows.length) return "";
+  const items=groupRows.slice().sort((a,b)=>a.target.localeCompare(b.target,"ja")).map(renderItem).join("");
+  return `<section class="group"><div class="group-label"><strong>${esc(group.label)}</strong><span>${esc(group.hint)} / ${groupRows.length}</span></div><div class="items">${items}</div></section>`;
+}
+function renderAnomaly(name,anomalyRows){
+  const statuses=[...new Set(anomalyRows.map(row=>row.status).filter(Boolean))];
+  const sections=[...new Set(anomalyRows.map(row=>row.section).filter(Boolean))];
+  const statusHtml=statuses.map(value=>`<span class="status ${value.includes("旧")?"old":""}">${esc(value)}</span>`).join("");
+  const sectionHtml=sections.slice(0,2).map(value=>`<span class="source-label">${esc(value)}</span>`).join("");
+  const groupsHtml=GROUPS.map(group=>renderGroup(group,anomalyRows.filter(row=>row.group===group.key))).join("");
+  return `<article class="anomaly"><div class="anomaly-header"><div><h2 class="anomaly-title">${esc(name)}</h2><div class="meta">${statusHtml}${sectionHtml}</div></div><div class="count">${anomalyRows.length}件</div></div><div class="groups">${groupsHtml}</div></article>`;
+}
+function render(){
+  const needle=q.value.trim().toLowerCase();
+  const filtered=rows.filter(row=>{
+    const haystack=Object.values(row).join(" ").toLowerCase();
+    return (!needle||haystack.includes(needle))&&(!type.value||row.group===type.value)&&(!status.value||row.status===status.value);
+  });
+  const anomalies=groupByAnomaly(filtered);
+  summary.textContent=`${filtered.length} / ${rows.length}件　異常 ${anomalies.length}種　対象 ${new Set(filtered.map(row=>row.target)).size}種`;
+  ledger.innerHTML=anomalies.length?anomalies.map(([name,anomalyRows])=>renderAnomaly(name,anomalyRows)).join(""):'<div class="empty">該当する項目はありません。</div>';
+}
+
+fillSelects();
+[q,type,status].forEach(element=>element.addEventListener("input",render));
+render();
+</script>
+</body>
+</html>
