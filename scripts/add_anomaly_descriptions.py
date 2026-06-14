@@ -16,6 +16,10 @@ JA_URL = f"https://api.hearthstonejson.com/v1/{BUILD}/jaJP/cards.json"
 
 MANUAL = {
     "Anomalous Cube": "「謎めいた立方体」を自分の2つ目のヒーローパワーにして開始する。それは5ターン目に解禁される。",
+    "Anomalous Expedition": "対戦の開始時、グレード6、4、2のミニオンを1体ずつ発見し、それぞれのグレード到達時にそれらを獲得する。",
+    "Lesser Fortune": "「下級水晶玉」を自分の2つ目のヒーローパワーにして開始する。下級水晶玉は、自分が下級装飾品を買う時、それのコピーに変身する。",
+    "Oathstone’s Summoning": "7ターン目に小さなタイムワープのミニオンを酒場のプールに入れ、10ターン目に大きなタイムワープのミニオンを同プールに入れる。",
+    "Galakrond": "異常名の分類を確認中です。",
 }
 
 ALIASES = {
