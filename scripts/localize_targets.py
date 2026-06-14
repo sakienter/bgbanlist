@@ -9,6 +9,7 @@ from pathlib import Path
 
 INDEX_PATH = Path("index.html")
 README_PATH = Path("README.md")
+UNRESOLVED_PATH = Path("unresolved-targets.txt")
 BUILD = "233025"
 EN_URL = f"https://api.hearthstonejson.com/v1/{BUILD}/enUS/cards.json"
 JA_URL = f"https://api.hearthstonejson.com/v1/{BUILD}/jaJP/cards.json"
@@ -31,7 +32,6 @@ def normalize(value: str) -> str:
 
 
 def english_part(value: str) -> str:
-    # Remove an existing Japanese localization in full-width parentheses.
     return re.sub(r"（[^（）]*）\s*$", "", value).strip()
 
 
@@ -69,11 +69,10 @@ def localized_target(target: str, restriction: str, lookup: dict[str, list[tuple
 
     candidates = lookup.get(normalize(english), [])
     if candidates:
-        card, japanese = sorted(candidates, key=lambda item: candidate_score(item[0], restriction))[0]
+        _, japanese = sorted(candidates, key=lambda item: candidate_score(item[0], restriction))[0]
         if japanese and normalize(japanese) != normalize(english):
             return f"{english}（{japanese}）"
 
-    # Preserve a localization that was already present in the source data.
     existing = re.search(r"（([^（）]+)）\s*$", target)
     if existing:
         return f"{english}（{existing.group(1)}）"
@@ -98,12 +97,11 @@ def main() -> None:
         if "（" not in row["target"]:
             unresolved.add(original)
 
-    if unresolved:
-        raise RuntimeError("Unresolved target names: " + ", ".join(sorted(unresolved)))
-
     encoded = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
     html = html[: match.start(1)] + encoded + html[match.end(1) :]
     INDEX_PATH.write_text(html, encoding="utf-8")
+
+    UNRESOLVED_PATH.write_text("\n".join(sorted(unresolved)) + ("\n" if unresolved else ""), encoding="utf-8")
 
     if README_PATH.exists():
         readme = README_PATH.read_text(encoding="utf-8")
