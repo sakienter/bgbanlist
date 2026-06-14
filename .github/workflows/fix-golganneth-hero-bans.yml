@@ -1,37 +1,8 @@
-name: Fix Golganneth hero BAN list
+name: Archived Golganneth correction
 on:
-  push:
-    paths:
-      - scripts/fix_golganneth_hero_bans.py
-      - .github/workflows/fix-golganneth-hero-bans.yml
-  pull_request:
-    paths:
-      - scripts/fix_golganneth_hero_bans.py
-      - .github/workflows/fix-golganneth-hero-bans.yml
   workflow_dispatch:
-permissions:
-  contents: write
 jobs:
-  update:
+  archived:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Run correction and capture diagnostics
-        run: |
-          set +e
-          python scripts/fix_golganneth_hero_bans.py > golganneth-run.log 2>&1
-          echo "exit_code=$?" >> golganneth-run.log
-          exit 0
-      - name: Commit correction or diagnostic
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html golganneth-run.log
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Run Golganneth hero BAN correction"
-          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+      - run: echo "Golganneth hero BAN correction has already been applied."
