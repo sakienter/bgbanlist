@@ -2,14 +2,17 @@
 
 ハースストーン：バトルグラウンドの異常別BAN・利用制限を、異常名と対象種別ごとにまとめた静的サイトです。
 
-## 構成
+## 現在の構成
 
 ```text
 .
 ├── index.html   # HTML・CSS・JavaScript・一覧データを含むページ本体
 ├── _headers     # Cloudflare Pages用HTTPヘッダー
+├── data/        # 旧分割構成のデータ。現在のページでは未使用
 └── README.md
 ```
+
+公開ページが実際に使用するのは `index.html` と `_headers` です。現在の `index.html` は単一ファイルで動作します。
 
 ## 主な機能
 
