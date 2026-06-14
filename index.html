@@ -234,7 +234,14 @@ function renderTrinketPoolRestrictions(){
 function renderAnomaly(name, anomalyRows){
   const description=ANOMALY_DESCRIPTIONS[name]||'';
   const descriptionHtml=description?`<p class="anomaly-description">${esc(description)}</p>`:'';
-  const groupsHtml=GROUPS.map(g=>renderGroup(g, anomalyRows.filter(r=>r.group===g.key))).join('');
+  const anomalyGroups=GROUPS.map(group=>{
+    const groupRows=anomalyRows.filter(row=>row.group===group.key);
+    if(group.key==='special' && groupRows.some(row=>/異常効果による内容変更/.test(row.restriction))){
+      return {...group,label:'バディの内容が変更されるヒーロー',hint:''};
+    }
+    return group;
+  });
+  const groupsHtml=anomalyGroups.map(group=>renderGroup(group, anomalyRows.filter(row=>row.group===group.key))).join('');
   const countHtml=anomalyRows.length?`<div class="count">${anomalyRows.length}件</div>`:''; return `<article class="anomaly"><header class="anomaly-header"><div><h2 class="anomaly-title">${esc(name)}</h2>${descriptionHtml}</div>${countHtml}</header><div class="groups">${groupsHtml}</div></article>`;
 }
 function render(){
