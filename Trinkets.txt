@@ -96,7 +96,7 @@ Ironforge Anvil（アイアンフォージの金床）
 Jailer Sticker（獄吏のステッカー）
 Jar o' Gems（宝石のビン）
 Jewelry Box（宝石箱）
-Kaboom Bot Portrait（カブーン・ボットの肖像画）
+Kaboom Bot Portrait（ブーマーロボの肖像画）
 Kaleidoscope（万華鏡）
 Lava Lamp（ラーヴァ・ランプ）
 Leapfrogger Portrait（乗りカエルの肖像画）
