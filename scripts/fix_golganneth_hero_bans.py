@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+# Replace only Golganneth's hero BAN rows; keep every other ledger entry unchanged.
 path = Path("index.html")
 html = path.read_text(encoding="utf-8")
 
