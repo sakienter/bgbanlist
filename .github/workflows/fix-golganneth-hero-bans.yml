@@ -1,8 +1,0 @@
-name: Archived Golganneth correction
-on:
-  workflow_dispatch:
-jobs:
-  archived:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Golganneth hero BAN correction has already been applied."
