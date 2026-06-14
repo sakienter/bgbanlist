@@ -7,6 +7,7 @@
 ```text
 .
 ├── index.html
+├── source.txt
 ├── hero-names.txt
 ├── Trinkets.txt
 ├── card-names.txt
@@ -15,6 +16,7 @@
 ```
 
 - `index.html`: 公開ページ本体
+- `source.txt`: 「ソース1欄」に表示するパッチ名と公式URL
 - `hero-names.txt`: ヒーロー名の英日表記マスター
 - `Trinkets.txt`: 装飾品名の英日表記マスター
 - `card-names.txt`: 補足カード名の英日表記マスター
@@ -26,6 +28,17 @@
 - ヒーロー・カード・装飾品：`English（日本語）`
 - ヒーロー名は `hero-names.txt` の表記を使用
 - 装飾品名は `Trinkets.txt` の表記を使用
+
+## ソース一覧の更新
+
+`source.txt` に、見出しとURLを1組ずつ記載します。
+
+```text
+35.6
+https://example.com/patch-notes
+```
+
+ページ上部の「ソース1欄」ボタンを押すと、内容がリンク一覧として表示されます。
 
 ## Cloudflare Pages
 
