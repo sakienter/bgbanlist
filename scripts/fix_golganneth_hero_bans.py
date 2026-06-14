@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 # Replace only Golganneth's hero BAN rows; keep every other ledger entry unchanged.
+# This revision is used for the verified correction pull request.
 path = Path("index.html")
 html = path.read_text(encoding="utf-8")
 
