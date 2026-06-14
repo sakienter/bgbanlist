@@ -8,6 +8,8 @@
 .
 ├── index.html
 ├── hero-names.txt
+├── Trinkets.txt
+├── card-names.txt
 ├── _headers
 └── README.md
 ```
@@ -34,3 +36,6 @@
 ## 注意
 
 掲載内容には、現行確認・公式履歴・旧仕様など異なる確認状態が含まれます。
+
+- `Trinkets.txt`: 装飾品名の英日表記マスター
+- `card-names.txt`: 補足カード名の英日表記マスター
