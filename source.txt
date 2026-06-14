@@ -1,6 +1,9 @@
 27.4.2
 https://hearthstone.blizzard.com/en-us/news/23999072/27-4-2-patch-notes
 
+31.2
+https://hearthstone.blizzard.com/en-us/news/24163459/31-2-patch-notes
+
 31.6
 https://hearthstone.blizzard.com/en-us/news/24179332/31-6-patch-notes
 
@@ -15,6 +18,9 @@ https://us.forums.blizzard.com/en/hearthstone/t/3163-patch-notes/142841
 
 32.0.3
 https://hearthstone.blizzard.com/en-us/news/24191047/32-0-3-patch-notes
+
+32.2.2
+https://hearthstone.blizzard.com/en-us/blog/24204092/
 
 32.4.2
 https://hearthstone.blizzard.com/en-us/news/24205944/32-4-2-patch-notes
