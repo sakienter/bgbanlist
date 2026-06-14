@@ -10,6 +10,7 @@ from pathlib import Path
 INDEX_PATH = Path("index.html")
 README_PATH = Path("README.md")
 UNRESOLVED_PATH = Path("unresolved-targets.txt")
+HERO_MASTER_PATH = Path("hero-names.txt")
 BUILD = "233025"
 EN_URL = f"https://api.hearthstonejson.com/v1/{BUILD}/enUS/cards.json"
 JA_URL = f"https://api.hearthstonejson.com/v1/{BUILD}/jaJP/cards.json"
@@ -19,16 +20,36 @@ MANUAL = {
 }
 
 
-def download_json(url: str) -> list[dict]:
-    request = urllib.request.Request(url, headers={"User-Agent": "bgbanlist-localizer/1.0"})
-    with urllib.request.urlopen(request, timeout=60) as response:
-        return json.load(response)
-
-
 def normalize(value: str) -> str:
     value = unicodedata.normalize("NFKC", value)
     value = value.replace("’", "'").replace("‘", "'").replace("–", "-").replace("—", "-")
     return " ".join(value.strip().split()).casefold()
+
+
+def build_hero_master() -> dict[str, str]:
+    master: dict[str, str] = {}
+    for raw_line in HERO_MASTER_PATH.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = re.fullmatch(r"(.+?)（(.+?)）", line)
+        if not match:
+            raise RuntimeError(f"Invalid hero master row: {line}")
+        english, japanese = match.groups()
+        master[normalize(english)] = f"{english}（{japanese}）"
+
+    # Older source text used the short label "Floop".
+    master[normalize("Floop")] = master[normalize("Flobbidinous Floop")]
+    return master
+
+
+HERO_MASTER = build_hero_master()
+
+
+def download_json(url: str) -> list[dict]:
+    request = urllib.request.Request(url, headers={"User-Agent": "bgbanlist-localizer/1.0"})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return json.load(response)
 
 
 def english_part(value: str) -> str:
@@ -64,6 +85,11 @@ def build_lookup(en_cards: list[dict], ja_cards: list[dict]) -> dict[str, list[t
 
 def localized_target(target: str, restriction: str, lookup: dict[str, list[tuple[dict, str]]]) -> str:
     english = english_part(target)
+
+    canonical_hero = HERO_MASTER.get(normalize(english))
+    if canonical_hero:
+        return canonical_hero
+
     if english in MANUAL:
         return f"{english}（{MANUAL[english]}）"
 
@@ -105,11 +131,11 @@ def main() -> None:
 
     if README_PATH.exists():
         readme = README_PATH.read_text(encoding="utf-8")
-        line = "- ヒーロー・カード・装飾品などを `English（日本語）` 形式で表示\n"
+        line = "- ヒーロー名は `hero-names.txt` の管理用表記を優先\n"
         if line.strip() not in readme:
             readme = readme.replace(
-                "- ヒーロー・カードなどの対象を囲みのないテキスト一覧で表示\n",
-                "- ヒーロー・カードなどの対象を囲みのないテキスト一覧で表示\n" + line,
+                "- ヒーロー・カード・装飾品などを `English（日本語）` 形式で表示\n",
+                "- ヒーロー・カード・装飾品などを `English（日本語）` 形式で表示\n" + line,
             )
             README_PATH.write_text(readme, encoding="utf-8")
 
