@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-# Replace only Golganneth's hero BAN rows; keep every other ledger entry unchanged.
+# Replace only Golganneth's hero restriction rows; keep every other ledger entry unchanged.
 path = Path("index.html")
 html = path.read_text(encoding="utf-8")
 
@@ -20,15 +20,15 @@ def is_golganneth(row):
 
 
 def is_target_hero_row(row):
-    return is_golganneth(row) and row.get("restriction") == "ヒーローBAN"
+    restriction = row.get("restriction", "")
+    return is_golganneth(row) and (
+        "ヒーロー" in restriction or "HERO" in restriction.upper()
+    )
 
 matching_indices = [i for i, row in enumerate(rows) if is_target_hero_row(row)]
 if not matching_indices:
-    matching_anomalies = sorted({row.get("anomaly", "") for row in rows if is_golganneth(row)})
-    raise RuntimeError(
-        "Golganneth hero BAN rows were not found. "
-        f"Matching anomaly labels: {matching_anomalies}"
-    )
+    matching_rows = [row for row in rows if is_golganneth(row)]
+    raise RuntimeError(f"Golganneth hero rows were not found. Matching rows: {matching_rows}")
 
 targets = [
     "Galakrond（ガラクロンド）",
@@ -79,7 +79,6 @@ insert_at = sum(1 for row in rows[:first_index] if not is_target_hero_row(row))
 replacement_rows = []
 for target in targets:
     row = dict(template)
-    row["restriction"] = "ヒーローBAN"
     row["target"] = target
     row["note"] = ""
     replacement_rows.append(row)
@@ -89,4 +88,7 @@ new_json = json.dumps(kept_rows, ensure_ascii=False, separators=(",", ":"))
 new_html = html[:json_start] + new_json + html[json_end:]
 path.write_text(new_html, encoding="utf-8")
 
-print(f"Replaced {len(matching_indices)} Golganneth hero BAN rows with {len(replacement_rows)} rows")
+print(
+    f"Replaced {len(matching_indices)} Golganneth hero rows with "
+    f"{len(replacement_rows)} rows using restriction '{template.get('restriction', '')}'"
+)
