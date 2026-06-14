@@ -26,3 +26,5 @@ jobs:
           git add index.html README.md unresolved-targets.txt
           git commit -m "Localize target names"
           git push
+
+# Re-run localization to generate the unresolved-name report.
