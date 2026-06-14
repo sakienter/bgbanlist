@@ -8,6 +8,19 @@
 :root { color-scheme: light; --bg:#f5f4ef; --paper:#fffefa; --panel:#ffffff; --ink:#202124; --muted:#697078; --line:#d9d7cd; --line-strong:#c4c2b8; --accent-soft:#e7f1ee; --hero:#e9f1ff; --card:#fff0df; --trinket:#f1ebff; --reroll:#e8f6e9; --special:#fff7cc; --old:#fff2d6; --shadow:0 1px 2px rgba(20,20,15,.05), 0 10px 24px rgba(20,20,15,.05); }
 * { box-sizing:border-box; } html { scroll-behavior:smooth; } body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
 header { background:var(--paper); border-bottom:1px solid var(--line); padding:28px 32px 20px; } h1 { margin:0 0 8px; font-size:30px; line-height:1.15; letter-spacing:0; } p { margin:0; color:var(--muted); line-height:1.55; }
+.header-actions { margin-top:14px; }
+.source-button { min-height:38px; border:1px solid var(--line-strong); border-radius:6px; padding:8px 14px; background:#fff; color:var(--ink); font:inherit; cursor:pointer; }
+.source-button:hover { background:#f8f7f2; }
+.source-button[aria-expanded="true"] { background:var(--accent-soft); border-color:#bfd5cf; }
+.source-panel { max-width:1180px; margin:16px auto 0; padding:0 32px; }
+.source-panel[hidden] { display:none; }
+.source-panel-inner { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:18px; box-shadow:var(--shadow); }
+.source-panel h2 { margin:0 0 10px; font-size:18px; }
+.source-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0 22px; }
+.source-entry { padding:10px 0; border-bottom:1px solid #ecebe5; }
+.source-entry strong { display:block; margin-bottom:3px; font-size:14px; }
+.source-entry a { color:#245f8f; font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+.source-message { color:var(--muted); font-size:14px; }
 .controls { position:sticky; top:0; z-index:4; display:grid; grid-template-columns:minmax(240px,1fr) minmax(340px,560px); gap:10px; padding:14px 32px; background:rgba(245,244,239,.96); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
 input,select { width:100%; min-height:40px; border:1px solid var(--line); border-radius:6px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
 .controls select { min-height:48px; padding:10px 14px; font-size:16px; }
@@ -25,11 +38,12 @@ main { max-width:1180px; margin:0 auto; padding:20px 32px 42px; } .summary { dis
 .item.hero, .item.card, .item.trinket, .item.reroll, .item.special { background:transparent; border-color:#ecebe5; }
 .note-dot { margin-left:6px; color:#775817; font-size:12px; } .empty { padding:28px; background:var(--panel); border:1px dashed var(--line-strong); border-radius:8px; color:var(--muted); text-align:center; }
 footer { max-width:1180px; margin:0 auto; padding:0 32px 30px; color:var(--muted); font-size:13px; }
-@media (max-width:760px) { header { padding:24px 16px 18px; } h1 { font-size:25px; } .controls { grid-template-columns:1fr; padding:12px 16px; } main,footer { padding-left:16px; padding-right:16px; } .anomaly-header { grid-template-columns:1fr; } .count { padding-top:0; } .group { grid-template-columns:1fr; } .group-label { border-right:0; border-bottom:1px solid #eeeeea; padding:11px 14px; } .items { padding-top:11px; } }
+@media (max-width:760px) { header { padding:24px 16px 18px; } .source-panel { padding:0 16px; } h1 { font-size:25px; } .controls { grid-template-columns:1fr; padding:12px 16px; } main,footer { padding-left:16px; padding-right:16px; } .anomaly-header { grid-template-columns:1fr; } .count { padding-top:0; } .group { grid-template-columns:1fr; } .group-label { border-right:0; border-bottom:1px solid #eeeeea; padding:11px 14px; } .items { padding-top:11px; } }
 </style>
 </head>
 <body>
-<header><h1>Anomaly Ban Ledger v1</h1><p>Grouped by anomaly, then by target type. This keeps the original source rows intact while making the ledger easier to scan.</p></header>
+<header><h1>Anomaly Ban Ledger v1</h1><p>Grouped by anomaly, then by target type. This keeps the original source rows intact while making the ledger easier to scan.</p><div class="header-actions"><button type="button" id="sourceToggle" class="source-button" aria-expanded="false" aria-controls="sourcePanel">ソース1欄</button></div></header>
+<section id="sourcePanel" class="source-panel" hidden><div class="source-panel-inner"><h2>ソース1欄</h2><div id="sourceList" class="source-list"><p class="source-message">読み込み中です。</p></div></div></section>
 <section class="controls" aria-label="filters"><input id="q" type="search" placeholder="Search anomaly, target, note..." autocomplete="off"><select id="anomalyFilter"><option value="">Anomaly</option></select></section>
 <main><div class="summary" id="summary"></div><div class="ledger" id="ledger"></div></main>
 <footer>Source: pasted-text.txt / Generated on 2026-06-14. Labels still preserve current confirmation, official history, old spec, candidate exclusion, and reroll restriction distinctions.</footer>
@@ -38,6 +52,10 @@ const rows = [{"section":"A. 現行35.6系で直接再確認できるBAN","anoma
 const ANOMALY_DESCRIPTIONS = {"【A Faire Reward/ フェア報酬】":"トリプル報酬が ミニオンの代わりに ダークムーンの景品 グレード1を1つ発見する。 （あと4ターンで アップグレード！）","【Anomalous Cube/ 異常な立方体】":"「謎めいた立方体」を自分の2つ目のヒーローパワーにして開始する。それは5ターン目に解禁される。","【Anomalous Expedition/ 異常な探検】":"対戦の開始時、グレード6、4、2のミニオンを1体ずつ発見し、それぞれのグレード到達時にそれらを獲得する。","【Anomalous Wisdomball/ 異常な教育球】":"時々役立つ 入替が行われる！ （5ターン目に解禁）","【Audience’s Choice/ 観客の選択】":"各ターンの開始時に プレイヤーの1人が 選択したカードが ターン終了時に 全プレイヤーに配られる。","【Big League/ 大リーグ】":"酒場グレード3、4 5、6のみ存在。 装甲を追加で10得て 対戦を開始する。","【Bring Home the Bacon/ ベーコン熟成】":"「ブタの貯金箱」 2個を得て開始。それらは 毎ターンアップグレードし 壊すとゴールドを獲得！","【Bring in the Buddies/ カモン、エブリバディ】":"酒場にバディが登場する。","【Continuing Education/ 生涯教育】":"各ターンの開始時 「進化スクロール」を 1枚得る。それは毎ターン グレードが1高い 酒場の呪文に変身する。","【Elven Elite/ エルフのエリート】":"酒場には 自分の酒場と 同じグレードの カードだけが並ぶ。","【Emergency Landing/ 緊急着水】":"毎ターン2回 酒場にいるミニオン1体の 同名ミニオン全てを 自分のプールから 除去できる。","【False Idols/ 偽りの偶像】":"同じミニオン 2体だけで ゴールデンにできる。 トリプル報酬の代わりに 「金貨」1枚を得る。","【Gladiator’s Spoil/ 剣闘士の戦利品】":"戦闘で勝った後 自分の酒場グレードの ミニオンを1体発見する。 さもなくばグレードが 1低いランダムな ミニオンを1体得る。","【Golden Arrow/ 黄金の矢】":"3ターンごとに 「黄金の矢」を 1本得る。","【Golden Friendship/ 黄金の友情】":"対戦中1回、 ミニオン1体を ゴールデン化して パスできる。","【Golganneth’s Tempest/ ゴルガンネスの天変地異】":"ミニオンのコストは 2ゴールド。 酒場を入替できない。 カードを買った後 酒場が入替される。","【Greater Pouches/ 上級袋】":"8ターン目と9ターン目に 上級装飾品を買える。 この対戦では 下級装飾品は登場しない。","【Impressive Foresight/ 素晴らしい先見性】":"下級装飾品を 5ターン目に 上級装飾品を 8ターン目に買える。","【Incubation Mutation/ 培養変異体】":"種族を持たない ミニオンは 全てのミニオンの 種族を持つ。","【Lesser Fortune/ 下級運勢】":"「下級水晶玉」を自分の2つ目のヒーローパワーにして開始する。下級水晶玉は、自分が下級装飾品を買う時、それのコピーに変身する。","【Lesser Pouches/ 下級袋】":"6ターン目と7ターン目に 下級装飾品を買える。 この対戦では 上級装飾品は登場しない。","【Light the Way/ 道を照らす光】":"自分が2回入替した後 次のターン 1ゴールドを獲得する。 （あと","【Line in the Sand/ 砂の覚醒】":"自陣に 「サンディ」が 1体いる状態で開始。","【Magic Shop/ 魔法の店】":"酒場に呪文チケット が登場！3枚揃えると 自分の酒場グレードの 酒場の呪文1枚を発見 できる。（あと","【Match Fixing/ 八百長】":"次の戦闘で 自分と相手の どちらが勝つか当てる。 正解したら 「金貨」を3枚得る。","【Mimiron’s Clockwork Stadium/ ミミロンの時計仕掛けスタジアム】":"酒場がゴールドで アップグレードできない。 2ターンごとに自動で アップグレードされる。","【Money Match/ マネーマッチ】":"開始時の手持ちが 10ゴールド。","【No Face, No Case/ 貌ナシ不起訴処分】":"4ターンごとに 「無貌の操り手」を 1体得る。","【Oathstone’s Summoning/ オースストーンの召喚】":"7ターン目に小さなタイムワープのミニオンを酒場のプールに入れ、10ターン目に大きなタイムワープのミニオンを同プールに入れる。","【Packed Stands/ スタンド満員】":"酒場には常に カードが7枚並ぶ。","【Path of the Treasure-Seeker/ トレジャーシーカーの道】":"5回入替した後 「黄金のサル」を 見つける！ （あと","【Pooled Resources/ 現金書留】":"チームメイトに ゴールドを送れる。","【Secrets of Norgannon/ ノルガノンの秘密】":"酒場グレード7が 存在する。 装甲を追加で10得て 対戦を開始する。","【Tavern Special/ 酒場スペシャル】":"ミニオン全種族が出場。 酒場にはカードが 常に7枚並ぶ。","【The Golden Arena/ ゴールデン闘技場】":"全てのミニオンは ゴールデン。 ただしトリプル報酬は 得られない。","【Treasure Hoard/ お宝貯蔵庫】":"6ターン目に、グレード4の ゴールデンミニオンを 1体発見する。","【Uncompensated Upset/ 補償なき市場】":"1ゴールドで対戦開始。 ミニオンのコストは （1）ゴールドだが 売値は（0）。 酒場アップグレードの コストが（2）減る。"};
 const q = document.getElementById('q');
 const anomalyFilter = document.getElementById('anomalyFilter');
+const sourceToggle = document.getElementById('sourceToggle');
+const sourcePanel = document.getElementById('sourcePanel');
+const sourceList = document.getElementById('sourceList');
+let sourceLoaded = false;
 const summary = document.getElementById('summary');
 const ledger = document.getElementById('ledger');
 const GROUPS = [
@@ -66,6 +84,44 @@ function fillSelects(){
       anomalyFilter.appendChild(option);
     });
 }
+async function loadSourceList(){
+  if(sourceLoaded) return;
+  try {
+    const response=await fetch('./source.txt',{cache:'no-store'});
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text=await response.text();
+    const lines=text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+    sourceList.innerHTML='';
+    for(let i=0;i<lines.length;i+=2){
+      const title=lines[i];
+      const url=lines[i+1]||'';
+      const item=document.createElement('div');
+      item.className='source-entry';
+      const heading=document.createElement('strong');
+      heading.textContent=title;
+      item.appendChild(heading);
+      if(url){
+        const link=document.createElement('a');
+        link.href=url;
+        link.target='_blank';
+        link.rel='noopener noreferrer';
+        link.textContent=url;
+        item.appendChild(link);
+      }
+      sourceList.appendChild(item);
+    }
+    sourceLoaded=true;
+  } catch(error) {
+    sourceList.innerHTML='<p class="source-message">ソース一覧を読み込めませんでした。</p>';
+  }
+}
+sourceToggle.addEventListener('click',async()=>{
+  const willOpen=sourcePanel.hidden;
+  sourcePanel.hidden=!willOpen;
+  sourceToggle.setAttribute('aria-expanded',String(willOpen));
+  if(willOpen) await loadSourceList();
+});
+
 function byAnomaly(filtered){ const map=new Map(); filtered.forEach(row => { if(!map.has(row.anomaly)) map.set(row.anomaly, []); map.get(row.anomaly).push(row); }); return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ja')); }
 function renderItem(row){ const note=row.note ? `<span class="note-dot" title="${esc(row.note)}">${esc(row.note)}</span>` : ''; return `<span class="item ${esc(row.group)}" title="${esc(row.restriction)}">${esc(row.target)}${note}</span>`; }
 function renderGroup(group, rowsForGroup){ if(!rowsForGroup.length) return ''; const items=rowsForGroup.slice().sort((a,b)=>a.target.localeCompare(b.target,'ja')).map(renderItem).join(''); return `<section class="group"><div class="group-label"><strong>${esc(group.label)}</strong><span>${esc(group.hint)} / ${rowsForGroup.length}</span></div><div class="items">${items}</div></section>`; }
