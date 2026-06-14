@@ -217,12 +217,18 @@ function byAnomaly(filtered){
 }
 function displayTarget(value){ const match=String(value??'').match(/（([^（）]+)）$/); return match?match[1]:String(value??''); }
 function renderItem(row){ const note=row.note ? `<span class="note-dot" title="${esc(row.note)}">${esc(row.note)}</span>` : ''; return `<span class="item ${esc(row.group)}" title="${esc(row.restriction)}">${esc(displayTarget(row.target))}${note}</span>`; }
-function renderGroup(group, rowsForGroup){ if(!rowsForGroup.length) return ''; const items=rowsForGroup.slice().sort((a,b)=>a.target.localeCompare(b.target,'ja')).map(renderItem).join(''); return `<section class="group"><div class="group-label"><strong>${esc(group.label)}</strong><span>${esc(group.hint)} / ${rowsForGroup.length}</span></div><div class="items">${items}</div></section>`; }
+function renderGroup(group, rowsForGroup){
+  if(!rowsForGroup.length) return '';
+  const items=rowsForGroup.slice().sort((a,b)=>a.target.localeCompare(b.target,'ja')).map(renderItem).join('');
+  const subLabel=group.hint?`${esc(group.hint)} / ${rowsForGroup.length}`:`${rowsForGroup.length}件`;
+  return `<section class="group"><div class="group-label"><strong>${esc(group.label)}</strong><span>${subLabel}</span></div><div class="items">${items}</div></section>`;
+}
 function renderTrinketPoolRestrictions(){
   const container=document.getElementById('trinketPoolRestrictions');
   if(!container) return;
   const poolRows=enrichedRows().filter(row=>isTrinketPoolRestrictionName(row.anomaly));
-  const groupsHtml=GROUPS.map(group=>renderGroup(group,poolRows.filter(row=>row.group===group.key))).join('');
+  const poolGroups=GROUPS.map(group=>group.key==='special'?{...group,label:'登場しないバディ',hint:''}:group);
+  const groupsHtml=poolGroups.map(group=>renderGroup(group,poolRows.filter(row=>row.group===group.key))).join('');
   container.innerHTML=groupsHtml||'<div class="empty">掲載項目はありません。</div>';
 }
 function renderAnomaly(name, anomalyRows){
