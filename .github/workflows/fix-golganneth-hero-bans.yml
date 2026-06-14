@@ -4,6 +4,10 @@ on:
     paths:
       - scripts/fix_golganneth_hero_bans.py
       - .github/workflows/fix-golganneth-hero-bans.yml
+  pull_request:
+    paths:
+      - scripts/fix_golganneth_hero_bans.py
+      - .github/workflows/fix-golganneth-hero-bans.yml
   workflow_dispatch:
 permissions:
   contents: write
@@ -12,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -22,4 +28,4 @@ jobs:
           git add index.html
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Correct Golganneth hero BAN list"
-          git push
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
