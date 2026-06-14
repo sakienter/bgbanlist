@@ -68,6 +68,13 @@ footer { max-width:1180px; margin:0 auto; padding:0 32px 30px; color:var(--muted
 <section id="sourcePanel" class="source-panel" hidden><div class="source-panel-inner"><h2>View source</h2><div id="sourceList" class="source-list"><p class="source-message">読み込み中です。</p></div></div></section>
 <section class="controls" aria-label="filters"><input id="q" type="search" placeholder="Search anomaly, target, note..." autocomplete="off"><select id="anomalyFilter"><option value="">Anomaly</option></select></section>
 <main><p class="restriction-note">特定の異常が発生している間、以下のヒーローは使用できない、または使用制限が適用されます。これらの制限は再抽選後も継続されます。</p>
+<details class="hero-trinket-section" id="trinketPoolRestrictionsSection">
+  <summary class="hero-trinket-heading">
+    <span class="hero-trinket-title">【装飾品プール禁止事項/Trinket Pool Restrictions】</span>
+  </summary>
+  <div class="hero-trinket-description">特定の条件下で装飾品プールから除外される項目です。</div>
+  <div id="trinketPoolRestrictions" class="groups"></div>
+</details>
 <details class="hero-trinket-section">
   <summary class="hero-trinket-heading">
     <span class="hero-trinket-title">ヒーロー固有の装飾品BAN</span>
@@ -137,6 +144,7 @@ const GROUPS = [
   { key:'special', label:'SPECIAL', hint:'種族・効果変更など', cls:'special' }
 ];
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function isTrinketPoolRestrictionName(value){ return /Trinket Pool Restrictions|装飾品プール禁止事項/i.test(String(value??'')); }
 function groupOf(restriction){
   if (/ヒーロー|HERO/i.test(restriction)) return 'hero';
   if (/装飾品|報酬|TRINKET/i.test(restriction)) return 'trinket';
@@ -147,6 +155,7 @@ function groupOf(restriction){
 function enrichedRows(){ return rows.map(r => ({ ...r, group: groupOf(r.restriction) })); }
 function fillSelects(){
   [...new Set([...rows.map(r=>r.anomaly),...Object.keys(ANOMALY_DESCRIPTIONS)].filter(Boolean))]
+    .filter(value=>!isTrinketPoolRestrictionName(value))
     .sort((a,b)=>a.localeCompare(b,'ja'))
     .forEach(value => {
       const option=document.createElement('option');
@@ -198,6 +207,7 @@ function byAnomaly(filtered){
   filtered.forEach(row=>{ if(!map.has(row.anomaly)) map.set(row.anomaly,[]); map.get(row.anomaly).push(row); });
   const needle=q.value.trim().toLowerCase();
   Object.keys(ANOMALY_DESCRIPTIONS).forEach(name=>{
+    if(isTrinketPoolRestrictionName(name)) return;
     if(anomalyFilter.value && name!==anomalyFilter.value) return;
     const hay=`${name} ${ANOMALY_DESCRIPTIONS[name]}`.toLowerCase();
     if(needle && !hay.includes(needle) && !map.has(name)) return;
@@ -208,6 +218,13 @@ function byAnomaly(filtered){
 function displayTarget(value){ const match=String(value??'').match(/（([^（）]+)）$/); return match?match[1]:String(value??''); }
 function renderItem(row){ const note=row.note ? `<span class="note-dot" title="${esc(row.note)}">${esc(row.note)}</span>` : ''; return `<span class="item ${esc(row.group)}" title="${esc(row.restriction)}">${esc(displayTarget(row.target))}${note}</span>`; }
 function renderGroup(group, rowsForGroup){ if(!rowsForGroup.length) return ''; const items=rowsForGroup.slice().sort((a,b)=>a.target.localeCompare(b.target,'ja')).map(renderItem).join(''); return `<section class="group"><div class="group-label"><strong>${esc(group.label)}</strong><span>${esc(group.hint)} / ${rowsForGroup.length}</span></div><div class="items">${items}</div></section>`; }
+function renderTrinketPoolRestrictions(){
+  const container=document.getElementById('trinketPoolRestrictions');
+  if(!container) return;
+  const poolRows=enrichedRows().filter(row=>isTrinketPoolRestrictionName(row.anomaly));
+  const groupsHtml=GROUPS.map(group=>renderGroup(group,poolRows.filter(row=>row.group===group.key))).join('');
+  container.innerHTML=groupsHtml||'<div class="empty">掲載項目はありません。</div>';
+}
 function renderAnomaly(name, anomalyRows){
   const description=ANOMALY_DESCRIPTIONS[name]||'';
   const descriptionHtml=description?`<p class="anomaly-description">${esc(description)}</p>`:'';
@@ -216,13 +233,13 @@ function renderAnomaly(name, anomalyRows){
 }
 function render(){
   const needle=q.value.trim().toLowerCase();
-  const all=enrichedRows();
+  const all=enrichedRows().filter(row=>!isTrinketPoolRestrictionName(row.anomaly));
   const filtered=all.filter(r => { const hay=Object.values(r).join(' ').toLowerCase(); return (!needle || hay.includes(needle)) && (!anomalyFilter.value || r.anomaly===anomalyFilter.value); });
   const anomalies=byAnomaly(filtered);
-  summary.innerHTML=`<span class="badge">${filtered.length} / ${rows.length} entries</span><span class="badge">${anomalies.length} anomalies</span><span class="badge">${new Set(filtered.map(r=>r.target)).size} unique targets</span>`;
+  summary.innerHTML=`<span class="badge">${filtered.length} / ${all.length} entries</span><span class="badge">${anomalies.length} anomalies</span><span class="badge">${new Set(filtered.map(r=>r.target)).size} unique targets</span>`;
   ledger.innerHTML=anomalies.length ? anomalies.map(([name, anomalyRows])=>renderAnomaly(name, anomalyRows)).join('') : '<div class="empty">No matching entries.</div>';
 }
-fillSelects(); [q,anomalyFilter].forEach(el=>el.addEventListener('input',render)); render();
+renderTrinketPoolRestrictions(); fillSelects(); [q,anomalyFilter].forEach(el=>el.addEventListener('input',render)); render();
 </script>
 </body>
 </html>
