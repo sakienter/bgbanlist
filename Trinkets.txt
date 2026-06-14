@@ -69,6 +69,7 @@ Explorer's Binoculars（探検家の双眼鏡）
 Faerie Dragon Scale（フェアリードラゴンの鱗）
 Fancy Spellbook（ファンシーな呪文書）
 Fang Anklet（牙のアンクレット）
+Felblood Portrait（フェルブラッドの肖像画）
 Felemental Portrait（フェレメンタルの肖像画）
 Fish Portrait（魚の肖像画）
 Flaming Portrait（燃え立つ肖像画）
@@ -80,6 +81,7 @@ Goblin Wallet（ゴブリンの財布）
 Gold Pendant（金のペンダント）
 Gold-plated Compass（金メッキの羅針盤）
 Goldenizer Supply（ゴールデナイザーの補給品）
+Goose Portrait（ガチョウの肖像画）
 Great Boar Sticker（巨猪のステッカー）
 Grifter Portrait（横領屋の肖像画）
 Groundbreaker Portrait（大地の破壊者の肖像画）
@@ -94,6 +96,7 @@ Ironforge Anvil（アイアンフォージの金床）
 Jailer Sticker（獄吏のステッカー）
 Jar o' Gems（宝石のビン）
 Jewelry Box（宝石箱）
+Kaboom Bot Portrait（カブーン・ボットの肖像画）
 Kaleidoscope（万華鏡）
 Lava Lamp（ラーヴァ・ランプ）
 Leapfrogger Portrait（乗りカエルの肖像画）
