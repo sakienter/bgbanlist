@@ -8,11 +8,10 @@
 .
 ├── index.html   # HTML・CSS・JavaScript・一覧データを含むページ本体
 ├── _headers     # Cloudflare Pages用HTTPヘッダー
-├── data/        # 旧分割構成のデータ。現在のページでは未使用
 └── README.md
 ```
 
-公開ページが実際に使用するのは `index.html` と `_headers` です。現在の `index.html` は単一ファイルで動作します。
+公開ページは `index.html` 単体で動作します。
 
 ## 主な機能
 
