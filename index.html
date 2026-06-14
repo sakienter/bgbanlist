@@ -237,7 +237,7 @@ function renderAnomaly(name, anomalyRows){
   const anomalyGroups=GROUPS.map(group=>{
     const groupRows=anomalyRows.filter(row=>row.group===group.key);
     if(group.key==='special' && groupRows.some(row=>/異常効果による内容変更/.test(row.restriction))){
-      return {...group,label:'バディの内容が変更されるヒーロー',hint:''};
+      return {...group,label:'登場しないバディ',hint:''};
     }
     return group;
   });
