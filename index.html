@@ -55,12 +55,12 @@ main { max-width:1180px; margin:0 auto; padding:20px 32px 42px; } .restriction-n
 .status { display:inline-flex; align-items:center; border-radius:999px; border:1px solid #cfe0dc; padding:3px 8px; background:#eef4f2; color:#174f47; font-size:12px; line-height:1.2; white-space:nowrap; } .status.old { background:var(--old); border-color:#efd49a; color:#745009; }
 .groups { display:grid; gap:0; } .group { display:grid; grid-template-columns:148px minmax(0,1fr); border-top:1px solid #eeeeea; } .group:first-child { border-top:0; }
 .group-label { padding:14px 16px; border-right:1px solid #eeeeea; background:#faf9f3; } .group-label strong { display:block; font-size:13px; letter-spacing:.04em; color:#30343a; } .group-label span { display:block; margin-top:4px; color:var(--muted); font-size:12px; }
-.items { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0 18px; align-content:start; padding:7px 14px 12px; }
+.items { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 18px; align-content:start; padding:7px 14px 12px; }
 .item { display:block; max-width:100%; border:0; border-bottom:1px solid #ecebe5; border-radius:0; background:transparent; padding:9px 0; line-height:1.35; font-size:14px; }
 .item.hero, .item.card, .item.trinket, .item.reroll, .item.special { background:transparent; border-color:#ecebe5; }
 .note-dot { margin-left:6px; color:#775817; font-size:12px; } .empty { padding:28px; background:var(--panel); border:1px dashed var(--line-strong); border-radius:8px; color:var(--muted); text-align:center; }
 footer { max-width:1180px; margin:0 auto; padding:0 32px 30px; color:var(--muted); font-size:13px; }
-@media (max-width:760px) { header { padding:24px 16px 18px; } .source-panel { padding:0 16px; } h1 { font-size:25px; } .controls { grid-template-columns:1fr; padding:12px 16px; } main,footer { padding-left:16px; padding-right:16px; } .anomaly-header { grid-template-columns:1fr; } .count { padding-top:0; } .group { grid-template-columns:1fr; } .group-label { border-right:0; border-bottom:1px solid #eeeeea; padding:11px 14px; } .items { padding-top:11px; } }
+@media (max-width:760px) { header { padding:24px 16px 18px; } .source-panel { padding:0 16px; } h1 { font-size:25px; } .controls { grid-template-columns:1fr; padding:12px 16px; } main,footer { padding-left:16px; padding-right:16px; } .anomaly-header { grid-template-columns:1fr; } .count { padding-top:0; } .group { grid-template-columns:1fr; } .group-label { border-right:0; border-bottom:1px solid #eeeeea; padding:11px 14px; } .items { grid-template-columns:1fr; padding-top:11px; } }
 </style>
 </head>
 <body>
