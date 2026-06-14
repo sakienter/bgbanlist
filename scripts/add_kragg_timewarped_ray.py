@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# One-time updater for the hero-specific restriction section.
 path = Path("index.html")
 html = path.read_text(encoding="utf-8")
 
