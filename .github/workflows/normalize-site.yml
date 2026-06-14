@@ -36,3 +36,5 @@ jobs:
           git add index.html README.md
           git commit -m "Normalize bilingual anomaly names and simplify item display"
           git push
+
+# Updating this workflow retriggers the normalization job when needed.
